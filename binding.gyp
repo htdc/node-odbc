@@ -10,12 +10,11 @@
         'src/dynodbc.cpp'
       ],
       'defines' : [
-        'UNICODE'
+        'dynodbc'
       ],
       'conditions' : [
         [ 'OS == "linux"', {
           'libraries' : [ 
-            '-lodbc' 
           ],
           'cflags' : [
             '-g'
@@ -23,8 +22,6 @@
         }],
         [ 'OS == "mac"', {
           'libraries' : [
-            '-L/usr/local/lib',
-            '-lodbc' 
           ]
         }],
         [ 'OS=="win"', {
@@ -33,7 +30,6 @@
             'src/odbc.cpp'
           ],
           'libraries' : [ 
-            '-lodbccp32.lib' 
           ]
         }]
       ]
