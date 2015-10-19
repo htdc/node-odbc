@@ -19,10 +19,10 @@
 
 #include <nan.h>
 
-class ODBCResult : public node::ObjectWrap {
+class ODBCResult : public Nan::ObjectWrap {
   public:
-   static Persistent<String> OPTION_FETCH_MODE;
-   static Persistent<Function> constructor;
+   static Nan::Persistent<String> OPTION_FETCH_MODE;
+   static Nan::Persistent<Function> constructor;
    static void Init(v8::Handle<Object> exports);
    
    void Free();
@@ -31,7 +31,7 @@ class ODBCResult : public node::ObjectWrap {
     ODBCResult() {};
     
     explicit ODBCResult(HENV hENV, HDBC hDBC, HSTMT hSTMT, bool canFreeHandle): 
-      ObjectWrap(),
+      Nan::ObjectWrap(),
       m_hENV(hENV),
       m_hDBC(hDBC),
       m_hSTMT(hSTMT),
@@ -40,18 +40,23 @@ class ODBCResult : public node::ObjectWrap {
     ~ODBCResult();
 
     //constructor
+public:
     static NAN_METHOD(New);
 
     //async methods
     static NAN_METHOD(Fetch);
+protected:
     static void UV_Fetch(uv_work_t* work_req);
     static void UV_AfterFetch(uv_work_t* work_req, int status);
 
+public:
     static NAN_METHOD(FetchAll);
+protected:
     static void UV_FetchAll(uv_work_t* work_req);
     static void UV_AfterFetchAll(uv_work_t* work_req, int status);
     
     //sync methods
+public:
     static NAN_METHOD(CloseSync);
     static NAN_METHOD(MoreResultsSync);
     static NAN_METHOD(FetchSync);
@@ -61,17 +66,18 @@ class ODBCResult : public node::ObjectWrap {
     //property getter/setters
     static NAN_GETTER(FetchModeGetter);
     static NAN_SETTER(FetchModeSetter);
-    
+
+protected:
     struct fetch_work_data {
-      NanCallback* cb;
+      Nan::Callback* cb;
       ODBCResult *objResult;
       SQLRETURN result;
       
       int fetchMode;
       int count;
       int errorCount;
-      Persistent<Array> rows;
-      Persistent<Object> objError;
+      Nan::Persistent<Array> rows;
+      Nan::Persistent<Object> objError;
     };
     
     ODBCResult *self(void) { return this; }

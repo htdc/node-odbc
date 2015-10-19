@@ -20,12 +20,12 @@
 
 #include <nan.h>
 
-class ODBCConnection : public node::ObjectWrap {
+class ODBCConnection : public Nan::ObjectWrap {
   public:
-   static Persistent<String> OPTION_SQL;
-   static Persistent<String> OPTION_PARAMS;
-   static Persistent<String> OPTION_NORESULTS;
-   static Persistent<Function> constructor;
+   static Nan::Persistent<String> OPTION_SQL;
+   static Nan::Persistent<String> OPTION_PARAMS;
+   static Nan::Persistent<String> OPTION_NORESULTS;
+   static Nan::Persistent<Function> constructor;
    
    static void Init(v8::Handle<Object> exports);
    
@@ -35,12 +35,13 @@ class ODBCConnection : public node::ObjectWrap {
     ODBCConnection() {};
     
     explicit ODBCConnection(HENV hENV, HDBC hDBC): 
-      ObjectWrap(),
+      Nan::ObjectWrap(),
       m_hENV(hENV),
       m_hDBC(hDBC) {};
      
     ~ODBCConnection();
 
+public:
     //constructor
     static NAN_METHOD(New);
 
@@ -53,46 +54,62 @@ class ODBCConnection : public node::ObjectWrap {
 
     //async methods
     static NAN_METHOD(BeginTransaction);
+protected:
     static void UV_BeginTransaction(uv_work_t* work_req);
     static void UV_AfterBeginTransaction(uv_work_t* work_req, int status);
-    
+
+public:
     static NAN_METHOD(EndTransaction);
+protected:
     static void UV_EndTransaction(uv_work_t* work_req);
     static void UV_AfterEndTransaction(uv_work_t* work_req, int status);
     
-    
+public:    
     static NAN_METHOD(Open);
+protected:
     static void UV_Open(uv_work_t* work_req);
     static void UV_AfterOpen(uv_work_t* work_req, int status);
 
+public:
     static NAN_METHOD(Close);
+protected:
     static void UV_Close(uv_work_t* work_req);
     static void UV_AfterClose(uv_work_t* work_req, int status);
 
+public:
     static NAN_METHOD(CreateStatement);
+protected:
     static void UV_CreateStatement(uv_work_t* work_req);
     static void UV_AfterCreateStatement(uv_work_t* work_req, int status);
 
+public:
     static NAN_METHOD(Query);
+protected:
     static void UV_Query(uv_work_t* req);
     static void UV_AfterQuery(uv_work_t* req, int status);
 
+public:
     static NAN_METHOD(Columns);
+protected:
     static void UV_Columns(uv_work_t* req);
-    
+
+public:
     static NAN_METHOD(Tables);
+protected:
     static void UV_Tables(uv_work_t* req);
     
     //sync methods
+public:
     static NAN_METHOD(CloseSync);
     static NAN_METHOD(CreateStatementSync);
     static NAN_METHOD(OpenSync);
     static NAN_METHOD(QuerySync);
     static NAN_METHOD(BeginTransactionSync);
     static NAN_METHOD(EndTransactionSync);
-    
+protected:
+
     struct Fetch_Request {
-      NanCallback* callback;
+      Nan::Callback* callback;
       ODBCConnection *objResult;
       SQLRETURN result;
     };
@@ -110,14 +127,14 @@ class ODBCConnection : public node::ObjectWrap {
 };
 
 struct create_statement_work_data {
-  NanCallback* cb;
+  Nan::Callback* cb;
   ODBCConnection *conn;
   HSTMT hSTMT;
   int result;
 };
 
 struct query_work_data {
-  NanCallback* cb;
+  Nan::Callback* cb;
   ODBCConnection *conn;
   HSTMT hSTMT;
   
@@ -140,7 +157,7 @@ struct query_work_data {
 };
 
 struct open_connection_work_data {
-  NanCallback* cb;
+  Nan::Callback* cb;
   ODBCConnection *conn;
   int result;
   int connectionLength;
@@ -148,7 +165,7 @@ struct open_connection_work_data {
 };
 
 struct close_connection_work_data {
-  NanCallback* cb;
+  Nan::Callback* cb;
   ODBCConnection *conn;
   int result;
 };
