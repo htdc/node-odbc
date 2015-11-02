@@ -34,7 +34,7 @@
   "dependencies": {
     "bindings": "^1.2.1",
     "nan": "^2.0.9"
-    "pangyp": "^2.2.0"
+    "node-gyp": "^3.0.3"
   },
   "gypfile": true
 }
