@@ -28,7 +28,7 @@
     "node": ">=0.8.0"
   },
   "scripts": {
-    "install": "node-gyp configure build",
+    "install": "node-gyp configure --arch=ia32 build",
     "test": "cd test && node run-tests.js"
   },
   "dependencies": {
