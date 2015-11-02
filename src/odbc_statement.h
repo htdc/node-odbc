@@ -19,9 +19,9 @@
 
 #include <nan.h>
 
-class ODBCStatement : public node::ObjectWrap {
+class ODBCStatement : public Nan::ObjectWrap {
   public:
-   static Persistent<Function> constructor;
+   static Nan::Persistent<Function> constructor;
    static void Init(v8::Handle<Object> exports);
    
    void Free();
@@ -30,7 +30,7 @@ class ODBCStatement : public node::ObjectWrap {
     ODBCStatement() {};
     
     explicit ODBCStatement(HENV hENV, HDBC hDBC, HSTMT hSTMT): 
-      ObjectWrap(),
+      Nan::ObjectWrap(),
       m_hENV(hENV),
       m_hDBC(hDBC),
       m_hSTMT(hSTMT) {};
@@ -38,39 +38,51 @@ class ODBCStatement : public node::ObjectWrap {
     ~ODBCStatement();
 
     //constructor
+public:
     static NAN_METHOD(New);
 
     //async methods
     static NAN_METHOD(Execute);
+protected:
     static void UV_Execute(uv_work_t* work_req);
     static void UV_AfterExecute(uv_work_t* work_req, int status);
 
+public:
     static NAN_METHOD(ExecuteDirect);
+protected:
     static void UV_ExecuteDirect(uv_work_t* work_req);
     static void UV_AfterExecuteDirect(uv_work_t* work_req, int status);
 
+public:
     static NAN_METHOD(ExecuteNonQuery);
+protected:
     static void UV_ExecuteNonQuery(uv_work_t* work_req);
     static void UV_AfterExecuteNonQuery(uv_work_t* work_req, int status);
     
+public:
     static NAN_METHOD(Prepare);
+protected:
     static void UV_Prepare(uv_work_t* work_req);
     static void UV_AfterPrepare(uv_work_t* work_req, int status);
-    
+
+public:
     static NAN_METHOD(Bind);
+protected:
     static void UV_Bind(uv_work_t* work_req);
     static void UV_AfterBind(uv_work_t* work_req, int status);
     
     //sync methods
+public:
     static NAN_METHOD(CloseSync);
     static NAN_METHOD(ExecuteSync);
     static NAN_METHOD(ExecuteDirectSync);
     static NAN_METHOD(ExecuteNonQuerySync);
     static NAN_METHOD(PrepareSync);
     static NAN_METHOD(BindSync);
-    
+protected:
+
     struct Fetch_Request {
-      NanCallback* callback;
+      Nan::Callback* callback;
       ODBCStatement *objResult;
       SQLRETURN result;
     };
@@ -92,7 +104,7 @@ class ODBCStatement : public node::ObjectWrap {
 };
 
 struct execute_direct_work_data {
-  NanCallback* cb;
+  Nan::Callback* cb;
   ODBCStatement *stmt;
   int result;
   void *sql;
@@ -100,13 +112,13 @@ struct execute_direct_work_data {
 };
 
 struct execute_work_data {
-  NanCallback* cb;
+  Nan::Callback* cb;
   ODBCStatement *stmt;
   int result;
 };
 
 struct prepare_work_data {
-  NanCallback* cb;
+  Nan::Callback* cb;
   ODBCStatement *stmt;
   int result;
   void *sql;
@@ -114,7 +126,7 @@ struct prepare_work_data {
 };
 
 struct bind_work_data {
-  NanCallback* cb;
+  Nan::Callback* cb;
   ODBCStatement *stmt;
   int result;
 };
