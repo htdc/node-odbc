@@ -25,6 +25,9 @@
           ]
         }],
         [ 'OS == "mac"', {
+          'include_dirs': [
+            '/usr/local/include'
+          ],
           'libraries' : [
           ]
         }],
