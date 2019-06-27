@@ -1,3 +1,15 @@
+# node-odbc 2.0.0 is now in beta!
+A new version of `odbc` has been released in beta! The initial release of this beta can be found at [https://www.npmjs.com/package/odbc/v/2.0.0-beta.0](https://www.npmjs.com/package/odbc/v/2.0.0-beta.0), while later releases can be found under the Versions tab on npm. This URL contains information including the README file outlining the new API.
+
+To install the beta version, include the `beta` tag with your command:
+```
+npm install odbc@beta
+```
+
+Test it out and give feedback on the issues of the official git repository!
+
+---
+
 node-odbc
 ---------
 
@@ -10,7 +22,10 @@ requirements
 * unixODBC binaries and development libraries for module compilation
   * on Ubuntu/Debian `sudo apt-get install unixodbc unixodbc-dev`
   * on RedHat/CentOS `sudo yum install unixODBC unixODBC-devel`
-  * on OSX using macports.org `sudo port unixODBC`
+  * on OSX
+    * using macports.org `sudo port unixODBC`
+    * using brew `brew install unixODBC`
+  * on IBM i `yum install unixODBC unixODBC-devel` (requires [yum](http://ibm.biz/ibmi-rpms))
 * odbc drivers for target database
 * properly configured odbc.ini and odbcinst.ini.
 
@@ -81,6 +96,16 @@ or by creating an instance with the constructor function:
 ```javascript
 var Database = require("odbc").Database
   , db = new Database();
+```
+
+#### .connected
+
+Returns a Boolean of whether the database is currently connected.
+
+```javascript
+var db = require("odbc")();
+
+console.log( "Connected: " + db.connected );
 ```
 
 #### .open(connectionString, callback)
