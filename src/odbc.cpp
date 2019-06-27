@@ -68,6 +68,7 @@ void ODBC::Init(v8::Handle<Object> exports) {
   constructor_template->Set(Nan::New<String>("SQL_RESET_PARAMS").ToLocalChecked(), Nan::New<Number>(SQL_RESET_PARAMS), constant_attributes);
   constructor_template->Set(Nan::New<String>("SQL_DESTROY").ToLocalChecked(), Nan::New<Number>(SQL_DESTROY), constant_attributes);
   constructor_template->Set(Nan::New<String>("FETCH_ARRAY").ToLocalChecked(), Nan::New<Number>(FETCH_ARRAY), constant_attributes);
+  constructor_template->Set(Nan::New<String>("SQL_USER_NAME").ToLocalChecked(), Nan::New<Number>(SQL_USER_NAME), constant_attributes);
   NODE_ODBC_DEFINE_CONSTANT(constructor_template, FETCH_OBJECT);
   
   // Prototype Methods
@@ -204,7 +205,7 @@ void ODBC::UV_AfterCreateConnection(uv_work_t* req, int status) {
     info[0] = Nan::New<External>(data->dbo->m_hEnv);
     info[1] = Nan::New<External>(data->hDBC);
     
-    Local<Value> js_result = Nan::New<Function>(ODBCConnection::constructor)->NewInstance(2, info);
+    Local<Object> js_result = Nan::NewInstance(Nan::New(ODBCConnection::constructor), 2, info).ToLocalChecked();
 
     info[0] = Nan::Null();
     info[1] = js_result;
@@ -251,7 +252,7 @@ NAN_METHOD(ODBC::CreateConnectionSync) {
   params[0] = Nan::New<External>(dbo->m_hEnv);
   params[1] = Nan::New<External>(hDBC);
 
-  Local<Object> js_result = Nan::New<Function>(ODBCConnection::constructor)->NewInstance(2, params);
+  Local<Object> js_result = Nan::NewInstance(Nan::New(ODBCConnection::constructor), 2, params).ToLocalChecked();
 
   info.GetReturnValue().Set(js_result);
 }
@@ -445,8 +446,10 @@ Handle<Value> ODBC::GetColumnValue( SQLHSTMT hStmt, Column column,
         , tm_wday : 0
         , tm_yday : 0
         , tm_isdst : 0
+        #ifndef _AIX //AIX does not have these 
         , tm_gmtoff : 0
         , tm_zone : 0
+        #endif
       };
 
       SQL_TIMESTAMP_STRUCT odbcTime;
@@ -482,6 +485,9 @@ Handle<Value> ODBC::GetColumnValue( SQLHSTMT hStmt, Column column,
         return scope.Escape(Nan::New<Date>((double(timegm(&timeInfo)) * 1000)
                           + (odbcTime.fraction / 1000000)).ToLocalChecked());
 #else
+#ifdef _AIX
+    #define timelocal mktime
+#endif
         return scope.Escape(Nan::New<Date>((double(timelocal(&timeInfo)) * 1000)
                           + (odbcTime.fraction / 1000000)).ToLocalChecked());
 #endif
@@ -847,11 +853,11 @@ Local<Object> ODBC::GetSQLError (SQLSMALLINT handleType, SQLHANDLE handle, char*
         // First error is assumed the primary error
         objError->Set(Nan::New("error").ToLocalChecked(), Nan::New(message).ToLocalChecked());
 #ifdef UNICODE
-        objError->SetPrototype(Exception::Error(Nan::New((uint16_t *)errorMessage).ToLocalChecked()));
+        Nan::SetPrototype(objError, Exception::Error(Nan::New((uint16_t *) errorMessage).ToLocalChecked()));
         objError->Set(Nan::New("message").ToLocalChecked(), Nan::New((uint16_t *)errorMessage).ToLocalChecked());
         objError->Set(Nan::New("state").ToLocalChecked(), Nan::New((uint16_t *)errorSQLState).ToLocalChecked());
 #else
-        objError->SetPrototype(Exception::Error(Nan::New(errorMessage).ToLocalChecked()));
+        Nan::SetPrototype(objError, Exception::Error(Nan::New(errorMessage).ToLocalChecked()));
         objError->Set(Nan::New("message").ToLocalChecked(), Nan::New(errorMessage).ToLocalChecked());
         objError->Set(Nan::New("state").ToLocalChecked(), Nan::New(errorSQLState).ToLocalChecked());
 #endif
@@ -876,7 +882,7 @@ Local<Object> ODBC::GetSQLError (SQLSMALLINT handleType, SQLHANDLE handle, char*
   if (statusRecCount == 0) {
     //Create a default error object if there were no diag records
     objError->Set(Nan::New("error").ToLocalChecked(), Nan::New(message).ToLocalChecked());
-    objError->SetPrototype(Exception::Error(Nan::New(message).ToLocalChecked()));
+    Nan::SetPrototype(objError, Exception::Error(Nan::New(message).ToLocalChecked()));
     objError->Set(Nan::New("message").ToLocalChecked(), Nan::New(
       (const char *) "[node-odbc] An error occurred but no diagnostic information was available.").ToLocalChecked());
   }
